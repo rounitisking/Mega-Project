@@ -1,0 +1,19 @@
+
+{
+ // "printWidth": 80,            // max line length before wrapping
+  "tabWidth": 2,               // number of spaces per tab
+  "useTabs": false,            // use tabs instead of spaces
+  "semi": true,                // add semicolons at the end of statements
+  "singleQuote": false,        // use single quotes instead of double
+//   "quoteProps": "as-needed",   // when to add quotes to object properties
+  "jsxSingleQuote": false,     // use single quotes in JSX
+  "trailingComma": "es5",      // add trailing commas ("none", "es5", "all")
+  "bracketSpacing": true,      // spaces between brackets: { foo: bar }
+  "bracketSameLine": false,    // put > of a JSX element on the same line
+  "arrowParens": "always"   // arrow function params: (x) => vs x =>
+//   "proseWrap": "preserve",     // markdown text wrapping
+//   "htmlWhitespaceSensitivity": "css", // HTML whitespace rules
+//   "endOfLine": "lf",           // line endings: "lf", "crlf", "cr", "auto"
+//   "embeddedLanguageFormatting": "auto" // format code inside markdown/jsx
+}
+
