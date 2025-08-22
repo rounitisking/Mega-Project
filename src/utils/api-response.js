@@ -1,6 +1,6 @@
 class apiResponse{
 
-    constructor(statuscode , msg ="success" , data){
+    constructor(statuscode , data, msg ="success" ){
         this.statuscode =  statuscode
         this.msg = msg
         this.data = data
@@ -8,4 +8,4 @@ class apiResponse{
     }
 }
 
-export {apiResponse}
+export default apiResponse

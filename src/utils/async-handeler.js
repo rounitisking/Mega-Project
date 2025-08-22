@@ -18,3 +18,5 @@ const asyncHandeler = (requestHandeler)=>{
         )
     }
 }
+
+export default asyncHandeler
