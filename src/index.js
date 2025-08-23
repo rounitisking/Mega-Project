@@ -1,5 +1,5 @@
 // to deploy the code on the local server we use docker -- command -- [docker run --name mongodb -d -p 27017:27017 mongo]
-
+// expres does not have fle handeling properties 
 
 import app from "./app.js"
 import dotenv from "dotenv"

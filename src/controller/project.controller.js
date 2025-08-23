@@ -1,0 +1,2 @@
+// controllers to make are - 1. get porject - means get all the project 2. get porjetc by id - means get single project  3.create porject   4. update project   5.delete project   6. addmember to project  7.gte porject memebers  8. update project member 9. update project member role 10. delete member
+//11.

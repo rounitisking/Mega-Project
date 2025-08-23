@@ -24,4 +24,4 @@ const loginUserValidator = ()=>{
     ]
 }
 
-export { registerUserValidator};
+export { registerUserValidator, loginUserValidator} ;

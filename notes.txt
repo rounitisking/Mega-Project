@@ -1,0 +1,25 @@
+node ke sath npm ata hai jiska matlab hai node package manager
+to start a project start with npm init
+
+
+how to push the code in github:-
+1. git init 
+2. git add .
+3. git commit -m "commit message"
+4. git branch -M main
+5. git remote add origin <github link>
+6. git push -u origin main
+
+
+if you have given the wrong github link erlier then do these steps :-
+1. git remote remove origin
+2.  git remote add origin <github link>
+4.  git remote -v    -if after running this two output are coming fetch and push then you have steup the correct url
+5. git branch -M main
+6. git push -u origin main
+
+
+for future pushes into the git 
+1. git add .  -- after this if you want to check if all the files are included then run this command = git status  after running this command u will be getting all files in green
+2. git commit -m "your message"
+3. git push
