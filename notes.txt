@@ -23,3 +23,16 @@ for future pushes into the git
 1. git add .  -- after this if you want to check if all the files are included then run this command = git status  after running this command u will be getting all files in green
 2. git commit -m "your message"
 3. git push
+
+
+to ignore the file from getting commited 
+1. create a .gitignore file 
+2. run these commands --
+3. echo "node_modules/" >> .gitignore
+4. echo "*.log" >> .gitignore
+
+
+if i have commited the .env file earlier and now i have to remove it in the new commit 
+1. create and add that file in the .gitignore folder
+2. echo ".env" >> .gitignore
+3. for stop tracking :-  git rm --cached .env

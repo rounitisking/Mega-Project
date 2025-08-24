@@ -2,7 +2,7 @@
 // here in the name it will be name of the email
 // link mai vo hoga jispe user click karega
 // ham ekfactory fucntion banayenge jismai ham ye karenge ki email ka jo option hai maitalba email ka content vo sab ham ek method se kr paye 
-// ham first priority html ko dete hai fir agar vo nhi jata tho ham text mai bhejte hai -- tho yaha ek email do data leke jate hai 
+// ham first priority html ko dete hai fir agar vo nhi jata tho ham text mai bhejte hai -- tho yaha ek email do data leke jate hai b
 
 
 import Mailgen from "mailgen";
