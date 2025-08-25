@@ -25,11 +25,9 @@ const EmailOption = function (body , outro){  /// here body is a object
     }
 }
 
-const registerUserEmail = EmailOption()
 
 
-
-const sendMail = async (registerUserEmail, Useremail , subject)=>{
+const sendMail = async (emailOptions, Useremail , subject)=>{
 
     // this code is for setting up and configuring Mailgen with a theme and product details.
     var mailGenerator = new Mailgen({
@@ -42,25 +40,25 @@ const sendMail = async (registerUserEmail, Useremail , subject)=>{
     }
 });
 
-var email = {
+var emailContent = {
     body: {
-        name: registerUserEmail.name, // here it will be name of the user to which the email is sending
-        intro: registerUserEmail.intro,
+        name: emailOptions.name, // here it will be name of the user to which the email is sending
+        intro: emailOptions.intro,
         action: {
-            instructions: registerUserEmail.instructions,
+            instructions: emailOptions.instructions,
             button: {
-                color:registerUserEmail.color, // Optional action button color
-                text: registerUserEmail.text,
-                link: registerUserEmail.link
+                color: emailOptions.color, // Optional action button color
+                text: emailOptions.text,
+                link: emailOptions.link
             }
         },
-        outro: registerUserEmail.Outro
+        outro: emailOptions.Outro
     }
 };
 
 
-var emailText = mailGenerator.generatePlaintext(email);
-let emailHtml = mailGenerator.generate(email)
+var emailText = mailGenerator.generatePlaintext(emailContent);
+let emailHtml = mailGenerator.generate(emailContent)
 
 // creating a transported in nodemail 
 const transporter = nodemailer.createTransport({
@@ -75,22 +73,28 @@ const transporter = nodemailer.createTransport({
 
 // sending the mail 
 const SendMail = async ()=>{
-await transporter.sendMail({
-    from: process.env.MAILTRAP_SENDER_EMAIL,
-    to: Useremail,
-    subject: subject,
-    text: emailText,
-    html: emailHtml
-  });
-
-  console.log("Message sent succesfully");
+    try {
+        await transporter.sendMail({
+            from: process.env.MAILTRAP_SENDER_EMAIL,
+            to: Useremail,
+            subject: subject,
+            text: emailText,
+            html: emailHtml
+        });
+        
+        console.log("Message sent successfully");
+        return true;
+    } catch (error) {
+        console.log("error occurred while sending the mail:", error.message);
+        return false;
+    }
 }
 
-
 try {
-    await SendMail()
+    return await SendMail();
 } catch (error) {
-    console.log("error occured while sending the mail")
+    console.log("error occurred while sending the mail:", error.message);
+    return false;
 }
 
 }

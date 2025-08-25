@@ -5,16 +5,17 @@ import app from "./app.js"
 import dotenv from "dotenv"
 import connectDB from "./db/connectDB.js"
 dotenv.config({
-    path : "..  /.env"
+    path : "../.env"
 })
 
-const port = 3000 || process.env.PORT 
+const port = process.env.PORT || 3000
 
-connectDB().then(
-    console.log("db is connected"),
+connectDB().then(() => {
+    console.log("db is connected")
     app.listen(port , ()=>{
-    console.log(`the server is listening on port ${port}`)
-})).catch((err)=>{
-    console.log("error occured in importing the db in the index.js")
+        console.log(`the server is listening on port ${port}`)
+    })
+}).catch((err)=>{
+    console.log("error occurred in importing the db in the index.js:", err)
 })
 

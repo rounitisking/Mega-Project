@@ -1,4 +1,5 @@
 import mongoose , {Schema} from "mongoose";
+import {AvailableUserStatus , TaskStausEnum} from "../utils/constants.js"
 
 const projectSchema = new Schema({
     title : {
@@ -19,8 +20,19 @@ const projectSchema = new Schema({
         required : true
     },
 
-    status : Boolean
+    status : {
+        type : String,
+        enum : AvailableUserStatus,
+        default : TaskStausEnum.TODO
+    },
+
+    members : [{
+        type :Schema.Types.ObjectId,
+        ref : "User",
+        required : true,
+        unique : true
+    }]
  } , {timestamps : true})
 
-export const project = mongoose.model(  "Project" ,projectSchema)
+export const Project = mongoose.model(  "Project" ,projectSchema)
 

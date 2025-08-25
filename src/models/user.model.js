@@ -2,7 +2,7 @@
 
 import mongoose , {Schema} from "mongoose";
 import {AvailableUserRoles , userRolesEnum} from "../utils/constants.js"
-import bcrypt from "bcryptjs"
+import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 import crypto from "crypto"
 const userSchema = new Schema({
@@ -20,7 +20,7 @@ const userSchema = new Schema({
 
     username : {
         type : String,
-        require : true,
+        required : false,
         unique : true,
         lowercase : true,
         trim : true,
@@ -42,7 +42,7 @@ const userSchema = new Schema({
     ,
 
     role  : {
-        type : string ,
+        type : String ,
         enum : AvailableUserRoles,
         default : userRolesEnum.MEMBER
     },
@@ -53,6 +53,7 @@ const userSchema = new Schema({
     },
 
     refreshToken : String,
+   
 
     forgotPwdToken : String,
     
@@ -62,16 +63,16 @@ const userSchema = new Schema({
 
     emailVerificationToken  : String,
     
-    emailVerificationToken  : {
+    emailVerificationTokenExpiry  : {
         type: Date
     },
 
 }, {timestamps : true})
 
 
-userSchema.pre("save" , async (next)=>{
+userSchema.pre("save" , async function(next){
 
-    if(!this.isModified(password)){ return next()}
+    if(!this.isModified("password")){ return next()}
      
     this.password = await bcrypt.hash(this.password , 10)
 
@@ -110,7 +111,7 @@ userSchema.methods.RefreshToken = function(){
 //generation of the email verification token
 //we will be using crypto to generate the token
 // here we are storing hashed token in the db 
-userSchema.methods.EmailVerificationToken = function (){
+userSchema.methods.EmailVerificationToken = function (){ // yaha pr methdos ka matlab hai ki ye jo fucntion create hua hai vo mdel ke instance se access hoga agar ham uske jagah statics krde tho vo mdel ke name se access hoga 
     const unhashedToken = crypto.randomBytes(20).toString("hex")
     // const hashedToken = bcrypt.hash(unhashedToken , 10)
     const hashedToken= crypto.createHash("sha256").update(unhashedToken).digest("hex") //.digest returns the hashed token in the format u asked 
@@ -118,4 +119,5 @@ userSchema.methods.EmailVerificationToken = function (){
     return {hashedToken , unhashedToken ,tokenExpiry}
 }
 
-export const user = mongoose.model(  "User" ,userSchema)
+const User = mongoose.model(  "User" ,userSchema)
+export default User

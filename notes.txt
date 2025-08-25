@@ -34,5 +34,5 @@ to ignore the file from getting commited
 
 if i have commited the .env file earlier and now i have to remove it in the new commit 
 1. create and add that file in the .gitignore folder
-2. echo ".env" >> .gitignore
-3. for stop tracking :-  git rm --cached .env
+2. echo ".env" >> .gitignore [agar multiple files hai tho har file mai ye command likho]
+3. for stop tracking :-  git rm --cached .env     [agar multiple files hai tho sabko ek line mai add krdo with an space between them and if used * before that it means ki us extension se khatam hone vali jitni bhi file hai usko exclude krdo]
