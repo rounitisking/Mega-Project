@@ -9,6 +9,7 @@ import {apiError} from "../utils/api.error.js"
 import dotenv from "dotenv"
 import {sendMail , EmailOption } from "../utils/mail.js"
 import jwt from "jsonwebtoken"
+import {userRolesEnum} from "../utils/constants.js"
 import { useReducer } from "react"
 dotenv.config()
 
@@ -21,7 +22,7 @@ const MakeProject = asyncHandeler(async (req , res  , next)=>{
         // yaha pr admin ka and members ka email ayega
         const {title  , discription , createdBy , status , members} = req.body
         
-        const projectAdmin = User.findOne({createdBy})
+        const projectAdmin = await User.findOne({email : createdBy})
         
         if(!projectAdmin){
            return  res.status(400).json(
@@ -29,18 +30,29 @@ const MakeProject = asyncHandeler(async (req , res  , next)=>{
             )
         }
 
-        Project.createdBy = projectAdmin.id
+        // mai yeh check kr raha hu ki jis bande ne req kri and jo email id admin ke liye diya hai kya vo user same hai ya nhi 
+        if(req.user.id != projectAdmin.id){
+            return res.status(400).json(
+                apiError(400 , "The person requested to make project and and the project admindetails does not match check again")
+            )
+        }
+         Project.createdBy = req.user.id
         
+         Project.members.push(req.user.id)
         const isNoProjectMember = false
-        for(i in members){
-            const ProjectMembers = User.findOne({email : i})
+        for(let i =0 ; i < members.length ; i++){
+            const ProjectMembers = User.findOne({email : members[i]})
             if(!ProjectMembers){
               isNoProjectMember = true
                 break
             }
         else{
-            Project.members.push(ProjectMembers.id)}
+            Project.members.push(ProjectMembers.id)
         }
+        
+    }
+
+
 
         if(isNoProjectMember){
              return res.status(400).json(
@@ -65,7 +77,24 @@ const UpdateProject = asyncHandeler(async (req, res , next)=>{
         // title , discription , member ko upate kr skte hai , created by ko update kr skte hia , status ko 
         // member ko add ya delete krna hia 
 
-         const {title  , discription , createdBy , status } = req.body
+         const {title  , discription , createdBy , status , ChangeAdmin} = req.body
+
+         // ham yaha ye validate kr rahe hai ki jis bande ne req kri hai and jo email provided hai kya vo same hai 
+        const projectAdmin = await User.findOne({email : createdBy})
+        
+        if(!projectAdmin){
+           return  res.status(400).json(
+                apiError(400 , "The projectAdmin user does not exsist plz change the projectAdmin")
+            )
+        }
+
+        // mai yeh check kr raha hu ki jis bande ne req kri and jo email id admin ke liye diya hai kya vo user same hai ya nhi 
+        if(req.user.id != projectAdmin.id){
+            return res.status(400).json(
+                apiError(400 , "The person requested to make project and and the project admindetails does not match check again")
+            )
+        }
+
 
          const project = Project.findOne({title})
 
@@ -83,8 +112,8 @@ const UpdateProject = asyncHandeler(async (req, res , next)=>{
                 project.discription = discription
          }
 
-         if(createdBy != null){
-                const ProjectAdmin = User.findOne({createdBy})
+         if(ChangeAdmin != null){
+                const ProjectAdmin = User.findOne({email : ChangeAdmin})
 
                 if(!ProjectAdmin){
                      res.status(400).json(
@@ -93,6 +122,8 @@ const UpdateProject = asyncHandeler(async (req, res , next)=>{
                 }
 
                 project.createdBy = projectAdmin.id
+                project.members = projectAdmin.id
+
          }
 
          if(status != null){
@@ -116,10 +147,21 @@ const DeleteProject = asyncHandeler(async (req, res ,next)=>{
     // uss project ko find kro 
     //project ki sari values ko empty krdo
 
-    const {title} = req.body
+    const {title , adminEmail} = req.body
 
-        const project = Project.findOne({title})
 
+
+    
+    // checkkig if the requesting person and the email provided are the same
+    const checkAdmin = User.findOne({email : adminEmail})
+    
+    if(req.user.id != checkAdmin.id){
+        return res.status(400).json(
+            apiError(400 ,"the user requesting to delete the project is a admin")
+        )
+    }
+    const project = Project.findOne({title})
+    
          if(!project){
            return res.status(400).json(
                 apiError(400 ,"No such porject found !!! enter a valid project name")
@@ -176,15 +218,24 @@ const GetProjectById = asyncHandeler(async (req, res , next)=>{
 })
 
 
-const GetProjectMembers = asyncHandeler(async (req, res ,next)=>{
+const GetProjectMembers = asyncHandeler(async (req, res ,next)=>{   
 
     // user se project ka title lo 
     // uss title pe project ko find kro 
     // bas uss prject ke members ko ko res mai bhej do 
 
-    const {title} = req.body 
+    const {title ,checkAdmin} = req.body 
 
     try {
+        //checking if the req user and the email of the admin are same
+        const user = User.findOne({email : checkAdmin})
+            if(req.user.id != user.id ){
+        return res.status(400).json(
+            apiError(400 ,"the user requesting to delete the project is a admin")
+        )
+    }
+
+
         const project = Project.findOne({title})
     
              if(!project){
@@ -211,9 +262,41 @@ const AddProjectMembers = asyncHandeler(async (req, res ,next)=>{
     //project members mai un id ko push krdo
 
     try {
-        const {title , members} = req.body
-    
+        const {title , members , checkAdmin} = req.body
+        
         const project = await Project.findOne({title})
+
+        //validate whether the requested person and email are same
+           const user = User.findOne({email : checkAdmin})
+            if(req.user.id != user.id ){
+        return res.status(400).json(
+            apiError(400 ,"the user requesting to delete the project is a admin")
+        )
+    }
+
+        //then ye check krna hia ki kya vo already ek member hai ya nhi 
+        isAlreadyMember = false
+        AlreadyMember = null
+        for(let i =0 ; i < members.length ; i++){
+            for(let j =0 ;j < project.members.length ; i++){
+                if(members[i] == project.members[j]){
+                    isAlreadyMember = true
+                    AlreadyMember = members[i]
+                    break
+                }
+            }
+            if(isAlreadyMember){
+                break;
+            }
+        }
+
+        if(isAlreadyMember){
+            return res.status(400).json(
+                new apiError(400 , `the member u want to add is already a member which is ${AlreadyMember}`)
+            )
+        }
+
+    
     
              if(!project){
                return res.status(400).json(
@@ -254,7 +337,19 @@ const DeleteProjectMembers = asyncHandeler(async (req, res ,next)=>{
         // uss id ko project ke members mai dhundho
         // remove krdo 
 
-    const {title , members} = req.body
+
+
+
+    const {title , members , checkAdmin} = req.body
+
+
+        //validate whether the requested person and email are same
+           const user = User.findOne({email : checkAdmin})
+            if(req.user.id != user.id ){
+        return res.status(400).json(
+            apiError(400 ,"the user requesting to delete the project is a admin")
+        )
+    }
     
         const project = await Project.findOne({title})
     
@@ -264,26 +359,11 @@ const DeleteProjectMembers = asyncHandeler(async (req, res ,next)=>{
                 )
              }
 
-        const userId = []
-        const IsNotUser = false
-        for( let i =0 ; i < members.length ; i++){
-            const user = await User.findOne({email : members[i]})
-            if(!user){
-                IsNotUser = true
-                break
-            }
-            else{userId.push(user.id)}
-        }
+        
 
-        if(IsNotUser){
-             return res.status(400).json(
-                apiError(400 ,`member u want to delete is not in the db plz enter a valid member`)
-            )
-        }
-
-        for(let i =0 ;i < userId.length ; i++){
+        for(let i =0 ;i < members.length ; i++){
             for(let j =0 ; j < project.members.length  ; j++){
-                if(userId[i] == project.members[j]){
+                if(members[i] == project.members[j]){
                 project.members.splice(1,j)
             }
             }
@@ -292,7 +372,7 @@ const DeleteProjectMembers = asyncHandeler(async (req, res ,next)=>{
         await project.save()
 
          return res.status(200).json(
-                apiError(200 ,project, "project member deleted")
+                apiError(200 ,project.members, "project member deleted")
             )
 
 
@@ -301,12 +381,93 @@ const DeleteProjectMembers = asyncHandeler(async (req, res ,next)=>{
 
 const UpdateProjectMembersRole = asyncHandeler(async (req, res ,next)=>{
     
+            // pehle tho valid the requested user
+            //project ko find kro by the help of title
+            // teen arary loon the basisi of member , admin , project admin 
+            // usk ebaad ye dekho ki ya vo members existing project mai hai ya nhi hai 
+            // agar agar null hai tho leave if array mai kuch hai then uss email se user ko find kro and change the email
+
+           const {title , member , admin , projectAdmin , checkAdmin} = req.body
+
+           
+
+        //validate whether the requested person and email are same
+           const user = await User.findOne({email : checkAdmin})
+            if(req.user.id != user.id ){
+        return res.status(400).json(
+            apiError(400 ,"the user requesting to delete the project is a admin")
+        )
+        }
+
+
+        const project = await Project.findOne({title})
+
+        if(!project){
+            return res.status(400).json(
+                new apiError(400 , "project not found")
+            )
+        }
+
+        if(member != []){
+            for(let i =0 ; i < member.length ; i++){
+                
+                await User.findByIdAndUpdate(project.members.id , {role : userRolesEnum.MEMBER})
+
+            }
+        }
+        if(admin != []){
+            for(let i =0 ; i < member.length ; i++){
+                
+                await User.findByIdAndUpdate(project.members.id , {role : userRolesEnum.MEMBER})
+
+            }
+        }
+        if(projectAdmin != []){
+            for(let i =0 ; i < member.length ; i++){
+                
+                await User.findByIdAndUpdate(project.members.id , {role : userRolesEnum.MEMBER})
+
+            }
+        }
+
+        return res.status(200).json(
+                new apiResponse(200 , "user role changed successfully")
+            )
+
 
 })
 
 
 const GetProjectByTitle = asyncHandeler(async (req, res ,next)=>{
 
-    
+    // user se prpoject ka title lo 
+    // search the project
+    // project ko res mai bhej do 
 
+    try {
+        const {title , checkAdmin} = req.body
+
+        //validate whether the requested person and email are same
+           const user = User.findOne({email : checkAdmin})
+            if(req.user.id != user.id ){
+        return res.status(400).json(
+            apiError(400 ,"the user requesting to delete the project is a admin")
+        )
+    }
+    
+            const project = await Project.findOne({title})
+        
+                 if(!project){
+                   return res.status(400).json(
+                        apiError(400 ,"No such porject found !!! enter a valid project name")
+                    )
+                 }
+            
+            return res.status(200).json(
+                        apiResponse(200 ,project , "these are the details of the project")
+                    )
+    
+    } catch (error) {
+        console.log("error occured in the getprojectbytitle controller")
+    }
 })
