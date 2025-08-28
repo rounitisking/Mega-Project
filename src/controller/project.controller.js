@@ -31,14 +31,14 @@ const MakeProject = asyncHandeler(async (req , res  , next)=>{
         }
 
         // mai yeh check kr raha hu ki jis bande ne req kri and jo email id admin ke liye diya hai kya vo user same hai ya nhi 
-        if(req.user.id != projectAdmin.id){
+        if(req.user._id != projectAdmin.id){
             return res.status(400).json(
                 apiError(400 , "The person requested to make project and and the project admindetails does not match check again")
             )
         }
-         Project.createdBy = req.user.id
+         Project.createdBy = req.user._id
         
-         Project.members.push(req.user.id)
+         Project.members.push(req.user._id)
         const isNoProjectMember = false
         for(let i =0 ; i < members.length ; i++){
             const ProjectMembers = User.findOne({email : members[i]})
@@ -89,7 +89,7 @@ const UpdateProject = asyncHandeler(async (req, res , next)=>{
         }
 
         // mai yeh check kr raha hu ki jis bande ne req kri and jo email id admin ke liye diya hai kya vo user same hai ya nhi 
-        if(req.user.id != projectAdmin.id){
+        if(req.user._id != projectAdmin.id){
             return res.status(400).json(
                 apiError(400 , "The person requested to make project and and the project admindetails does not match check again")
             )
@@ -155,7 +155,7 @@ const DeleteProject = asyncHandeler(async (req, res ,next)=>{
     // checkkig if the requesting person and the email provided are the same
     const checkAdmin = User.findOne({email : adminEmail})
     
-    if(req.user.id != checkAdmin.id){
+    if(req.user._id != checkAdmin.id){
         return res.status(400).json(
             apiError(400 ,"the user requesting to delete the project is a admin")
         )
@@ -229,7 +229,7 @@ const GetProjectMembers = asyncHandeler(async (req, res ,next)=>{
     try {
         //checking if the req user and the email of the admin are same
         const user = User.findOne({email : checkAdmin})
-            if(req.user.id != user.id ){
+            if(req.user._id != user.id ){
         return res.status(400).json(
             apiError(400 ,"the user requesting to delete the project is a admin")
         )
@@ -268,7 +268,7 @@ const AddProjectMembers = asyncHandeler(async (req, res ,next)=>{
 
         //validate whether the requested person and email are same
            const user = User.findOne({email : checkAdmin})
-            if(req.user.id != user.id ){
+            if(req.user._id != user.id ){
         return res.status(400).json(
             apiError(400 ,"the user requesting to delete the project is a admin")
         )
@@ -345,7 +345,7 @@ const DeleteProjectMembers = asyncHandeler(async (req, res ,next)=>{
 
         //validate whether the requested person and email are same
            const user = User.findOne({email : checkAdmin})
-            if(req.user.id != user.id ){
+            if(req.user._id != user.id ){
         return res.status(400).json(
             apiError(400 ,"the user requesting to delete the project is a admin")
         )
@@ -393,7 +393,7 @@ const UpdateProjectMembersRole = asyncHandeler(async (req, res ,next)=>{
 
         //validate whether the requested person and email are same
            const user = await User.findOne({email : checkAdmin})
-            if(req.user.id != user.id ){
+            if(req.user._id != user.id ){
         return res.status(400).json(
             apiError(400 ,"the user requesting to delete the project is a admin")
         )
@@ -408,6 +408,59 @@ const UpdateProjectMembersRole = asyncHandeler(async (req, res ,next)=>{
             )
         }
 
+        //first check whether the members user has sent are they in the porject
+        // and ye bi check kro ki agar vo pehle se member hai tho kya unka role same tho nhi hai jismai vo request kr raha 
+        isMember = false
+        for(let i =0 ; i < member.length ; i++){
+            for(let j =0  ; j < project.members.length ; j++){
+                if(member[i] == project.members[j]){
+                    isMember = true;
+                    
+                }
+                else{
+                    return res.status(400).json(
+            apiError(400 ,"the user you are requesting to change the role does exsist in this project")
+        ) 
+                }
+            }
+        }
+
+        
+
+        isAdmin = false
+        for(let i =0 ; i < admin.length ; i++){
+            for(let j =0  ; j < project.members.length ; j++){
+                if(admin[i] == project.members[j]){
+                    isAdmin = true;
+                    
+                }
+                else{
+                     return res.status(400).json(
+            apiError(400 ,"the user requesting to change role is not in the project is a project")
+        )
+                }
+            }
+        }
+
+    
+
+        isProjectAdmin = false
+        for(let i =0 ; i < projectAdmin.length ; i++){
+            for(let j =0  ; j < project.members.length ; j++){
+                if(projectAdmin[i] == project.members[j]){
+                    isProjectAdmin = true;
+                    
+                }
+                else{
+                      return res.status(400).json(
+            apiError(400 ,"the user requesting to change role is not in the project is a project")
+        )
+                }
+            }
+        }
+        
+
+        
         if(member != []){
             for(let i =0 ; i < member.length ; i++){
                 
@@ -449,7 +502,7 @@ const GetProjectByTitle = asyncHandeler(async (req, res ,next)=>{
 
         //validate whether the requested person and email are same
            const user = User.findOne({email : checkAdmin})
-            if(req.user.id != user.id ){
+            if(req.user._id != user.id ){
         return res.status(400).json(
             apiError(400 ,"the user requesting to delete the project is a admin")
         )

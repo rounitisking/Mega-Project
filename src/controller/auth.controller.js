@@ -168,7 +168,7 @@ const viewProfileUser = asyncHandeler(async (req, res , next)=>{
                       return res.status(400).json(apiError(400 ,"errror occured in verify the access token to let the user to see their profile"))
                 }
 
-                const user = await User.findById(req.user.id).select("-password")
+                const user = await User.findById(req.user._id).select("-password")
 
                 res.status(200).json(
                         apiResponse(200 , user , "this is the profile setting")
@@ -187,7 +187,7 @@ const logoutUser = asyncHandeler(async (req, res , next)=>{
                       return res.status(400).json(apiError(400 ,"errror occured in verify the access token to let the user to see their profile"))
                 }
 
-                const user = await User.findById(req.user.id).select("-password")
+                const user = await User.findById(req.user._id).select("-password")
 
                 user.refreshToken = ""
                 await user.save()

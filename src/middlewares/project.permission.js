@@ -16,7 +16,7 @@ const MakeProjectValidator = asyncHandeler(async (req , res ,next)=>{
 //if not admin and project admin throw error
 
 
-        const id = req.user.id
+        const id = req.user._id
         if(!id){
            return  new res.status(400).json(
                 new apiError(400 , "no user id found -- error occured in the permision make project middleware")
@@ -52,7 +52,7 @@ const AdminProjectValidator = asyncHandeler(async (req , res ,next)=>{
 
 
 
-        const id = req.user.id
+        const id = req.user._id
         if(!id){
            return  new res.status(400).json(
                 new apiError(400 , "no user id found -- error occured in the permision make project middleware")
